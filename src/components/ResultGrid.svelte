@@ -1,5 +1,5 @@
 <script>
-  import { onMount } from 'svelte';
+  import { onMount, createEventDispatcher } from 'svelte';
   import { resultGrid, shareResult } from '../lib/share.js';
   import { msUntilTomorrow } from '../lib/daily.js';
   import { KOFI_URL } from '../lib/kofi.js';
@@ -7,6 +7,9 @@
   export let puzzle;
   export let answers;
   export let streak;
+  export let isToday = true;
+
+  const dispatch = createEventDispatcher();
 
   $: score = answers.filter((a) => a.correct).length;
   $: total = answers.length;
@@ -32,6 +35,7 @@
   }
 
   onMount(() => {
+    if (!isToday) return;
     const tick = () => (countdown = format(msUntilTomorrow()));
     tick();
     const id = setInterval(tick, 1000);
@@ -63,10 +67,14 @@
     {/each}
   </div>
 
-  <div class="streak">
-    <span>Streak <strong>{streak.current}</strong></span>
-    <span>Best <strong>{streak.max}</strong></span>
-  </div>
+  {#if isToday}
+    <div class="streak">
+      <span>Streak <strong>{streak.current}</strong></span>
+      <span>Best <strong>{streak.max}</strong></span>
+    </div>
+  {:else}
+    <p class="archived">A roll from the archive. Your streak is safe either way.</p>
+  {/if}
 
   <button class="share" type="button" on:click={onShare}>Share your result</button>
   {#if toast}<p class="toast" role="status">{toast}</p>{/if}
@@ -86,7 +94,18 @@
     </a>
   </aside>
 
-  <p class="tomorrow">Fresh rolls in <strong>{countdown}</strong></p>
+  {#if isToday}
+    <p class="tomorrow">Fresh rolls in <strong>{countdown}</strong></p>
+  {:else}
+    <div class="nav">
+      <button type="button" class="back" on:click={() => dispatch('today')}>
+        Back to today's roll
+      </button>
+      <button type="button" class="more" on:click={() => dispatch('archive')}>
+        Pick another day
+      </button>
+    </div>
+  {/if}
 </section>
 
 <style>
@@ -189,5 +208,36 @@
     margin-top: 1.5rem;
     color: var(--ink-soft);
     font-size: 0.9rem;
+  }
+  .archived {
+    color: var(--ink-soft);
+    font-size: 0.9rem;
+    margin-bottom: 1.25rem;
+  }
+  .nav {
+    display: flex;
+    gap: 0.6rem;
+    margin-top: 1.5rem;
+  }
+  .nav button {
+    flex: 1;
+    padding: 0.75rem;
+    border-radius: var(--radius);
+    font-weight: 700;
+    font-size: 0.95rem;
+    cursor: pointer;
+  }
+  .back {
+    border: none;
+    background: var(--crust);
+    color: #fff;
+  }
+  .back:hover {
+    background: var(--crust-dark);
+  }
+  .more {
+    border: 1px solid var(--line);
+    background: var(--surface);
+    color: var(--ink);
   }
 </style>

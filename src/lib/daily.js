@@ -23,6 +23,25 @@ export function dayNumber(date = new Date()) {
   return Math.floor((utcMidnight - EPOCH) / DAY_MS);
 }
 
+// Today's day number, the highest day a player can reach.
+export function todayNumber() {
+  return dayNumber();
+}
+
+// The calendar date a given day number falls on, for displaying archived days.
+export function dateForDay(n) {
+  return new Date(EPOCH + n * DAY_MS);
+}
+
+export function dateLabelForDay(n) {
+  return dateForDay(n).toLocaleDateString(undefined, {
+    weekday: 'short',
+    day: 'numeric',
+    month: 'short',
+    timeZone: 'UTC',
+  });
+}
+
 // FNV-1a string hash, used to turn a day number into a well-spread seed so that
 // consecutive days look unrelated rather than marching through the pool in order.
 function fnv1a(str) {
@@ -84,8 +103,7 @@ function buildChoices(question, rng) {
 // local words for an ordinary roll, so any roll photo is an honest fit. A few questions
 // pin a specific, verified photo (a real stottie, a real bin lid) where the identity of
 // the bread genuinely matters; those keep their own image, alt text and size.
-export function buildPuzzle(date = new Date()) {
-  const n = dayNumber(date);
+export function buildPuzzleForDay(n) {
   const rng = rngForDay(n);
 
   const rounds = shuffle([...QUESTIONS], rng)
@@ -108,12 +126,17 @@ export function buildPuzzle(date = new Date()) {
     }
   }
 
-  const local = new Date(date.getFullYear(), date.getMonth(), date.getDate());
   return {
     dayNumber: n,
-    dateISO: local.toISOString().slice(0, 10),
+    dateISO: dateForDay(n).toISOString().slice(0, 10),
     rounds,
   };
+}
+
+// Build the puzzle for a calendar date (today by default). A thin wrapper over
+// buildPuzzleForDay so the same rounds can be rebuilt for any past day in the archive.
+export function buildPuzzle(date = new Date()) {
+  return buildPuzzleForDay(dayNumber(date));
 }
 
 // Whether a chosen name counts as correct for a round, honouring the small set of

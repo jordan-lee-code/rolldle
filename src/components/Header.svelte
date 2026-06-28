@@ -2,6 +2,8 @@
   import { createEventDispatcher } from 'svelte';
 
   export let dayNumber;
+  export let isToday = true;
+  export let dateLabel = '';
   const dispatch = createEventDispatcher();
 </script>
 
@@ -10,10 +12,19 @@
     <span class="loaf" aria-hidden="true">🍞</span>
     <div>
       <h1>Rolldle</h1>
-      <p class="sub">No.&nbsp;{dayNumber} · what do you call a bread roll?</p>
+      <p class="sub">
+        No.&nbsp;{dayNumber} · {isToday ? 'what do you call a bread roll?' : dateLabel}
+      </p>
     </div>
   </div>
   <nav>
+    <button
+      type="button"
+      class="pill"
+      on:click={() => dispatch('archive')}
+      aria-label="Roll archive"
+      title="Roll archive">🗓</button
+    >
     <button
       type="button"
       class="pill"

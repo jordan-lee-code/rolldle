@@ -1,19 +1,22 @@
 import { writable } from 'svelte/store';
-import { buildPuzzle, isCorrect } from './daily.js';
+import { buildPuzzleForDay, isCorrect, todayNumber } from './daily.js';
 import { load, save } from './persistence.js';
 
-// One store holds the whole game. It builds today's puzzle, restores any saved
-// progress, walks the player through the rounds, and writes back to localStorage as
-// it goes so a refresh mid-game never loses your place and you can't replay a day
-// you've already finished.
+// One store holds the whole game. It starts on today's puzzle, restores any saved
+// progress, walks the player through the rounds, and writes back to localStorage as it
+// goes so a refresh mid-game never loses your place and you can't replay a day you've
+// already finished. It can also switch to any earlier day so you can catch up on rolls
+// you missed; the archive shares the exact same machinery, just for a different number.
 
-function createGame() {
-  const puzzle = buildPuzzle();
+// Build the full state for a given day: its puzzle, any answers already saved for it,
+// and the phase to resume in. `freshPhase` is where a never-played day lands ('intro'
+// for the very first visit, 'playing' when you pick a day from the archive on purpose).
+function hydrate(n, freshPhase = 'intro') {
+  const puzzle = buildPuzzleForDay(n);
   const saved = load();
-  const today = saved.results[puzzle.dayNumber] ?? null;
+  const rec = saved.results[n] ?? null;
 
-  // Replay the saved guesses for today (if any) back into in-memory answers.
-  const answers = (today?.guesses ?? []).map((choiceIndex, i) => {
+  const answers = (rec?.guesses ?? []).map((choiceIndex, i) => {
     const round = puzzle.rounds[i];
     return {
       choiceIndex,
@@ -21,17 +24,20 @@ function createGame() {
     };
   });
 
-  const complete = Boolean(today?.complete);
-  const initial = {
+  const complete = Boolean(rec?.complete);
+  return {
     puzzle,
+    isToday: n === todayNumber(),
     seenHelp: saved.seenHelp,
     streak: saved.streak,
     answers,
     current: complete ? puzzle.rounds.length : answers.length,
-    phase: complete ? 'done' : answers.length > 0 ? 'playing' : 'intro',
+    phase: complete ? 'done' : answers.length > 0 ? 'playing' : freshPhase,
   };
+}
 
-  const { subscribe, update, set } = writable(initial);
+function createGame() {
+  const { subscribe, update, set } = writable(hydrate(todayNumber()));
 
   // Persist the parts of a turn that must outlive a reload, layering them onto the
   // existing save so we never trample the player's wider history or streak.
@@ -47,7 +53,9 @@ function createGame() {
       score: correct.filter(Boolean).length,
       complete: finishing,
     };
-    if (finishing) {
+    // The streak only moves for the genuine daily puzzle, never for catching up on the
+    // archive, so going back through old days can't inflate or break it.
+    if (finishing && state.isToday) {
       data.streak = nextStreak(data.streak, state.puzzle.dayNumber);
       state.streak = data.streak;
     }
@@ -58,6 +66,12 @@ function createGame() {
     subscribe,
     start() {
       update((s) => (s.phase === 'intro' ? { ...s, phase: 'playing' } : s));
+    },
+    loadDay(n) {
+      set(hydrate(n, 'playing'));
+    },
+    goToToday() {
+      set(hydrate(todayNumber()));
     },
     markHelpSeen() {
       update((s) => {
@@ -96,9 +110,9 @@ function createGame() {
   };
 }
 
-// Streak counts days played, kept warm rather than punishing: an unbroken run of
-// daily visits builds it up, a missed day quietly starts it again at one. Replaying
-// the same finished day leaves it untouched.
+// Streak counts days played, kept warm rather than punishing: an unbroken run of daily
+// visits builds it up, a missed day quietly starts it again at one. Replaying the same
+// finished day leaves it untouched.
 function nextStreak(streak, dayNumber) {
   let current;
   if (streak.lastDay === dayNumber) {

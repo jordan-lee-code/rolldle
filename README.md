@@ -9,6 +9,12 @@ Everyone playing on a given day gets the same five rolls, deterministically chos
 from the date, so you can share a row of squares without spoiling anyone's go. There
 is no backend; it's a static site built with Vite and Svelte.
 
+Because every day's puzzle is rebuildable from its number alone, there's a small
+archive behind the 🗓 button in the header: you can go back and play any day you
+missed, all the way to day zero. The archive shares the exact same machinery as the
+daily game, so a past day plays and saves just like today's. Only today's roll moves
+your streak, though, so catching up is purely for the pleasure of it.
+
 ## Running it locally
 
 ```

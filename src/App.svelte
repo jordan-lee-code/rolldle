@@ -3,18 +3,30 @@
   import Header from './components/Header.svelte';
   import HowToPlay from './components/HowToPlay.svelte';
   import Credits from './components/Credits.svelte';
+  import Archive from './components/Archive.svelte';
   import RoundCard from './components/RoundCard.svelte';
   import ResultGrid from './components/ResultGrid.svelte';
   import { game } from './lib/store.js';
-  import { ROUNDS_PER_DAY } from './lib/daily.js';
+  import { ROUNDS_PER_DAY, dateLabelForDay } from './lib/daily.js';
   import { KOFI_URL } from './lib/kofi.js';
 
   let showHelp = false;
   let showCredits = false;
+  let showArchive = false;
 
-  $: ({ puzzle, phase, current, answers, streak, seenHelp } = $game);
+  $: ({ puzzle, phase, current, answers, streak, seenHelp, isToday } = $game);
   $: round = puzzle.rounds[current];
   $: currentAnswer = answers[current] ?? null;
+  $: dateLabel = dateLabelForDay(puzzle.dayNumber);
+
+  function openDay(n) {
+    showArchive = false;
+    game.loadDay(n);
+  }
+
+  function goToToday() {
+    game.goToToday();
+  }
 
   onMount(() => {
     // Greet first-timers with the rules; everyone else goes straight to the rolls.
@@ -30,9 +42,16 @@
 <main>
   <Header
     dayNumber={puzzle.dayNumber}
+    {isToday}
+    {dateLabel}
+    on:archive={() => (showArchive = true)}
     on:help={() => (showHelp = true)}
     on:credits={() => (showCredits = true)}
   />
+
+  {#if !isToday && phase !== 'done'}
+    <button class="back-today" type="button" on:click={goToToday}>← Back to today's roll</button>
+  {/if}
 
   {#if phase === 'intro'}
     <section class="intro">
@@ -53,7 +72,14 @@
       on:next={() => game.advance()}
     />
   {:else if phase === 'done'}
-    <ResultGrid {puzzle} {answers} {streak} />
+    <ResultGrid
+      {puzzle}
+      {answers}
+      {streak}
+      {isToday}
+      on:today={goToToday}
+      on:archive={() => (showArchive = true)}
+    />
   {/if}
 
   <footer>
@@ -66,6 +92,9 @@
 {/if}
 {#if showCredits}
   <Credits on:close={() => (showCredits = false)} />
+{/if}
+{#if showArchive}
+  <Archive on:select={(e) => openDay(e.detail)} on:close={() => (showArchive = false)} />
 {/if}
 
 <a
@@ -86,6 +115,22 @@
     min-height: 100vh;
     display: flex;
     flex-direction: column;
+  }
+  .back-today {
+    align-self: flex-start;
+    margin-top: 0.75rem;
+    padding: 0.4rem 0.75rem;
+    border: 1px solid var(--line);
+    background: var(--surface);
+    color: var(--ink-soft);
+    border-radius: 999px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  .back-today:hover {
+    color: var(--ink);
+    border-color: var(--crust);
   }
   .intro {
     text-align: center;
