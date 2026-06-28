@@ -7,6 +7,7 @@
   import ResultGrid from './components/ResultGrid.svelte';
   import { game } from './lib/store.js';
   import { ROUNDS_PER_DAY } from './lib/daily.js';
+  import { KOFI_URL } from './lib/kofi.js';
 
   let showHelp = false;
   let showCredits = false;
@@ -67,6 +68,16 @@
   <Credits on:close={() => (showCredits = false)} />
 {/if}
 
+<a
+  class="kofi-float"
+  href={KOFI_URL}
+  target="_blank"
+  rel="noopener"
+  aria-label="Support Rolldle on Ko-fi"
+>
+  <span aria-hidden="true">☕</span> Ko-fi
+</a>
+
 <style>
   main {
     max-width: 30rem;
@@ -94,6 +105,27 @@
     border-radius: var(--radius);
     font-weight: 700;
     font-size: 1.1rem;
+  }
+  .kofi-float {
+    position: fixed;
+    bottom: 1rem;
+    right: 1rem;
+    z-index: 40;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.55rem 0.95rem;
+    border-radius: 999px;
+    background: var(--crust);
+    color: #fff;
+    font-weight: 700;
+    font-size: 0.92rem;
+    text-decoration: none;
+    box-shadow: var(--shadow);
+    border: 1px solid rgba(0, 0, 0, 0.12);
+  }
+  .kofi-float:hover {
+    background: var(--crust-dark);
   }
   footer {
     margin-top: auto;

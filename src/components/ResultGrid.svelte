@@ -2,6 +2,7 @@
   import { onMount } from 'svelte';
   import { resultGrid, shareResult } from '../lib/share.js';
   import { msUntilTomorrow } from '../lib/daily.js';
+  import { KOFI_URL } from '../lib/kofi.js';
 
   export let puzzle;
   export let answers;
@@ -75,6 +76,16 @@
     <textarea readonly rows="3">{gridText}</textarea>
   </details>
 
+  <aside class="kofi">
+    <p>
+      Rolldle is free, and made for the love of a daft argument about bread. If it
+      brightened your morning, you're warmly welcome to buy me a cup of tea.
+    </p>
+    <a class="kofi-btn" href={KOFI_URL} target="_blank" rel="noopener">
+      <span aria-hidden="true">☕</span> Support me on Ko-fi
+    </a>
+  </aside>
+
   <p class="tomorrow">Fresh rolls in <strong>{countdown}</strong></p>
 </section>
 
@@ -147,6 +158,32 @@
     color: var(--ink);
     font-family: inherit;
     resize: none;
+  }
+  .kofi {
+    margin-top: 1.75rem;
+    padding: 1.1rem 1rem;
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    background: var(--surface);
+  }
+  .kofi p {
+    color: var(--ink-soft);
+    font-size: 0.92rem;
+    margin-bottom: 0.9rem;
+  }
+  .kofi-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.7rem 1.2rem;
+    border-radius: var(--radius);
+    background: var(--crust);
+    color: #fff;
+    font-weight: 700;
+    text-decoration: none;
+  }
+  .kofi-btn:hover {
+    background: var(--crust-dark);
   }
   .tomorrow {
     margin-top: 1.5rem;
