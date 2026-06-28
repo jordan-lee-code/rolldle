@@ -1,14 +1,14 @@
-// Builds the local image pool: a hundred or so bread-roll photos from Wikimedia
-// Commons, gathered across many categories so they come from a wide spread of
-// contributors. Open licences only. Images that are CC0 or public domain need no
-// credit at all; for the rest we keep a full provenance manifest in the repo, so the
-// app stays uncluttered while the attribution still exists honestly on disk.
+// Builds the local image pool: bread-roll photos from Wikimedia Commons, gathered
+// across many categories, languages and searches so they come from a wide spread of
+// contributors. Open licences only. CC0 and public-domain images need no attribution;
+// for the rest we keep full provenance in public/images/pool/manifest.json.
 //
-// Openverse would add even more sources, but its API now sits behind a Cloudflare
-// challenge that blocks automated use; a Pexels/Pixabay/Unsplash key would be the way
-// to widen the net further.
+// This casts a deliberately wide net and downloads more than the target, because a
+// visual review afterwards prunes anything that isn't a genuine photograph of a roll
+// (scenes, paintings, machinery, sliced-bread sandwiches). Title filtering here only
+// trims the obvious noise; eyes do the rest.
 //
-// Usage: node scripts/fetch-pool.mjs [target-count]
+// Usage: node scripts/fetch-pool.mjs [download-target]
 import { mkdirSync, writeFileSync, rmSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
@@ -18,7 +18,7 @@ const API = 'https://commons.wikimedia.org/w/api.php';
 const here = dirname(fileURLToPath(import.meta.url));
 const root = join(here, '..');
 const poolDir = join(root, 'public', 'images', 'pool');
-const TARGET = Number(process.argv[2] ?? 100);
+const TARGET = Number(process.argv[2] ?? 380);
 
 rmSync(poolDir, { recursive: true, force: true });
 mkdirSync(poolDir, { recursive: true });
@@ -26,9 +26,7 @@ mkdirSync(poolDir, { recursive: true });
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 const strip = (s) => (s ?? '').replace(/<[^>]*>/g, '').replace(/\s+/g, ' ').trim();
 
-// Categories chosen to surface bread rolls in their many forms and from many hands.
-// We take a capped slice from each so no single category dominates the pool. Scene-
-// heavy categories (sandwiches, barbecues, shopfronts) are deliberately left out.
+// Categories spanning the roll's many regional and national forms.
 const CATEGORIES = [
   'Bread rolls',
   'Buns (food)',
@@ -37,19 +35,36 @@ const CATEGORIES = [
   'Kaiser rolls',
   'Submarine rolls',
   'Dinner rolls',
-  'Bread rolls of Germany',
-  'Bread rolls of the United Kingdom',
-  'Bread rolls of Sweden',
-  'Brötchen',
-  'Semmel',
   'Soft white bread',
   'Poppy seed rolls',
   'Sesame seed rolls',
-  'Pretzel rolls',
   'Milk rolls',
   'Stottie cake',
   'Barm cakes',
+  'Brötchen',
+  'Semmel',
+  'Schrippe',
+  'Bread rolls of Germany',
+  'Bread rolls of Austria',
+  'Bread rolls of Switzerland',
+  'Bread rolls of Sweden',
+  'Bread rolls of Denmark',
+  'Bread rolls of Finland',
+  'Bread rolls of Poland',
+  'Bread rolls of the United Kingdom',
+  'Bread rolls of the United States',
+  'Hard rolls',
+  'Wholemeal bread rolls',
+  'Rye bread rolls',
+  'Pretzel rolls',
+  'Hot dog buns',
+  'Hamburger buns',
+  'Burger buns',
+  'Filled rolls',
+  'Crusty rolls',
 ];
+const PER_CATEGORY = 40;
+
 const SEARCHES = [
   'bread roll plate',
   'floury bap bread',
@@ -66,66 +81,85 @@ const SEARCHES = [
   'poppy seed roll bread',
   'sesame seed roll bread',
   'brioche bun bread',
-  'ciabatta roll bread',
   'milk roll bread',
   'rustic bread roll',
+  'crusty white roll',
+  'soft floury roll',
+  'bread bun close up',
+  'morning roll scotland',
+  'bap filled roll',
+  'sub roll bread',
+  'ciabatta roll',
+  'wheat dinner roll',
+  'bakery bread roll fresh',
 ];
-const PER_CATEGORY = 20;
+const PER_SEARCH = 60;
 
-// Crude but cheap title filtering: keep things that read as a roll, drop obvious
-// scene photos (a barbecue, a market stall, a shopfront) that categories drag in.
-const MUST_MATCH = /(roll|bun|bap|br[oö]tchen|semmel|cob|barm|stott|teacake|bread)/i;
-const MUST_NOT = /(grill|barbecue|bbq|market|stall|shop|store|buffet|sandwich|burger|hot dog|hotdog|factory|production|machine|vending|sign|menu|street|restaurant|cafe|plate of food|breakfast table)/i;
+// Keep things that read as a roll; drop obvious scenes and non-photographs early.
+const MUST_MATCH = /(roll|bun|bap|br[oö]tchen|semmel|schrippe|weck|cob|barm|stott|teacake|bread)/i;
+const MUST_NOT =
+  /(boat|ship|submarine|warship|navy|aircraft|plane|train|car\b|vehicle|building|factory|machine|parking|ticket|concert|band|festival|cosplay|costume|portrait|landscape|street|shop|store|market|stall|museum|\bmap\b|sign|menu|logo|diagram|chart|painting|illustration|drawing|sketch|still life|still-life|engraving|woodcut|child|children|crowd|people|woman|\bman\b|portrait|statue|coat of arms)/i;
 const titleOk = (title) => {
   const t = title.replace(/^File:/, '').replace(/\.[^.]+$/, '');
   return MUST_MATCH.test(t) && !MUST_NOT.test(t);
 };
 
-const NO_CREDIT = /^(cc0|public domain|pd|cc-pd)/i;
-const OK_LICENCE = /^(cc0|cc-by|cc by|pd|public domain)/i;
-
-async function categoryMembers(cat, limit) {
+async function apiGet(params) {
   const url = new URL(API);
-  url.search = new URLSearchParams({
-    action: 'query',
-    format: 'json',
-    list: 'categorymembers',
-    cmtitle: `Category:${cat}`,
-    cmtype: 'file',
-    cmlimit: String(limit),
-  });
+  url.search = new URLSearchParams({ format: 'json', ...params });
   const res = await fetch(url, { headers: { 'User-Agent': UA } });
-  const data = await res.json();
-  return (data?.query?.categorymembers ?? []).map((m) => m.title);
+  if (!res.ok) throw new Error(`api ${res.status}`);
+  return res.json();
 }
 
-async function searchTitles(term, limit) {
-  const url = new URL(API);
-  url.search = new URLSearchParams({
-    action: 'query',
-    format: 'json',
-    list: 'search',
-    srsearch: `filetype:bitmap ${term}`,
-    srnamespace: '6',
-    srlimit: String(limit),
-  });
-  const res = await fetch(url, { headers: { 'User-Agent': UA } });
-  const data = await res.json();
-  return (data?.query?.search ?? []).map((m) => m.title);
+async function categoryMembers(cat, cap) {
+  const titles = [];
+  let cmcontinue;
+  do {
+    const data = await apiGet({
+      action: 'query',
+      list: 'categorymembers',
+      cmtitle: `Category:${cat}`,
+      cmtype: 'file',
+      cmlimit: '50',
+      ...(cmcontinue ? { cmcontinue } : {}),
+    });
+    for (const m of data?.query?.categorymembers ?? []) titles.push(m.title);
+    cmcontinue = data?.continue?.cmcontinue;
+    await sleep(250);
+  } while (cmcontinue && titles.length < cap);
+  return titles.slice(0, cap);
+}
+
+async function searchTitles(term, cap) {
+  const titles = [];
+  let offset = 0;
+  while (titles.length < cap) {
+    const data = await apiGet({
+      action: 'query',
+      list: 'search',
+      srsearch: `filetype:bitmap ${term}`,
+      srnamespace: '6',
+      srlimit: '50',
+      sroffset: String(offset),
+    });
+    const hits = data?.query?.search ?? [];
+    for (const m of hits) titles.push(m.title);
+    if (!data?.continue?.sroffset) break;
+    offset = data.continue.sroffset;
+    await sleep(250);
+  }
+  return titles.slice(0, cap);
 }
 
 async function imageinfo(titles) {
-  const url = new URL(API);
-  url.search = new URLSearchParams({
+  const data = await apiGet({
     action: 'query',
-    format: 'json',
     titles: titles.join('|'),
     prop: 'imageinfo',
     iiprop: 'url|extmetadata|mime',
     iiurlwidth: '800',
   });
-  const res = await fetch(url, { headers: { 'User-Agent': UA } });
-  const data = await res.json();
   return Object.values(data?.query?.pages ?? {});
 }
 
@@ -149,37 +183,44 @@ async function download(url, path) {
   }
 }
 
-// Gather candidate titles, capped per category, deduped and title-filtered.
+const NO_CREDIT = /^(cc0|public domain|pd|cc-pd)/i;
+const OK_LICENCE = /^(cc0|cc-by|cc by|pd|public domain)/i;
+
+// Gather candidate titles.
 const titles = new Set();
 for (const cat of CATEGORIES) {
   try {
     const members = (await categoryMembers(cat, PER_CATEGORY)).filter(titleOk);
     members.forEach((t) => titles.add(t));
-    console.log(`  cat ${cat}: +${members.length}`);
+    console.log(`  cat ${cat}: +${members.length} (total ${titles.size})`);
   } catch (err) {
     console.log(`! category ${cat}: ${err.message}`);
   }
-  await sleep(400);
 }
 for (const term of SEARCHES) {
   try {
-    const found = (await searchTitles(term, 25)).filter(titleOk);
+    const found = (await searchTitles(term, PER_SEARCH)).filter(titleOk);
     found.forEach((t) => titles.add(t));
-    console.log(`  search ${term}: +${found.length}`);
+    console.log(`  search ${term}: +${found.length} (total ${titles.size})`);
   } catch (err) {
     console.log(`! search ${term}: ${err.message}`);
   }
-  await sleep(400);
 }
 const titleList = [...titles];
-console.log(`gathered ${titleList.length} unique file titles after filtering`);
+console.log(`gathered ${titleList.length} unique candidate titles after title filter`);
 
 const pool = [];
 const manifest = [];
 let creditFree = 0;
 
-outer: for (let i = 0; i < titleList.length; i += 20) {
-  const pages = await imageinfo(titleList.slice(i, i + 20));
+outer: for (let i = 0; i < titleList.length; i += 25) {
+  let pages;
+  try {
+    pages = await imageinfo(titleList.slice(i, i + 25));
+  } catch (err) {
+    console.log(`! imageinfo batch ${i}: ${err.message}`);
+    continue;
+  }
   for (const page of pages) {
     if (pool.length >= TARGET) break outer;
     const info = page.imageinfo?.[0];
@@ -209,16 +250,16 @@ outer: for (let i = 0; i < titleList.length; i += 20) {
       licenceUrl: meta.LicenseUrl?.value ?? '',
       creditRequired: !noCredit,
     });
-    console.log(`✓ ${file}  [${licence}]${noCredit ? '' : '  (credit kept)'}`);
-    await sleep(700);
+    if (pool.length % 25 === 0) console.log(`  downloaded ${pool.length}/${TARGET}`);
+    await sleep(650);
   }
 }
 
 const poolJs =
-  '// Generated by scripts/fetch-pool.mjs — the local image pool the daily puzzle draws\n' +
-  '// from. Provenance for every image is in public/images/pool/manifest.json. Most are\n' +
-  '// CC0 / public domain; any that require credit are flagged there. Re-run to refresh.\n' +
+  '// Generated by scripts/fetch-pool.mjs, then pruned of non-roll images and paintings\n' +
+  '// after a visual review. The local image pool the daily puzzle draws from. Provenance\n' +
+  '// is in public/images/pool/manifest.json. Most images are CC0 / public domain.\n' +
   `export const POOL = ${JSON.stringify(pool, null, 2)};\n`;
 writeFileSync(join(root, 'src', 'lib', 'data', 'pool.js'), poolJs);
 writeFileSync(join(poolDir, 'manifest.json'), JSON.stringify(manifest, null, 2));
-console.log(`\n${pool.length} images saved (${creditFree} need no credit, ${pool.length - creditFree} credited in manifest).`);
+console.log(`\n${pool.length} images downloaded (${creditFree} need no credit). Now compress and review.`);
