@@ -1,9 +1,10 @@
 import { defineConfig } from 'vite';
 import { svelte } from '@sveltejs/vite-plugin-svelte';
 
-// base is the repo name so the built site works at https://<user>.github.io/rolldle/.
-// Set this to '/' if you later serve rolldle from the root of a custom domain.
+// Served from the root of its own custom domain (rolldle.co.uk), so the base is '/'.
+// The domain is pinned by public/CNAME and by the repo's Pages settings. If you ever
+// serve it back under a subpath (e.g. <user>.github.io/rolldle/), set base to '/rolldle/'.
 export default defineConfig({
   plugins: [svelte()],
-  base: '/rolldle/',
+  base: '/',
 });

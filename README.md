@@ -76,6 +76,13 @@ The repo ships with `.github/workflows/deploy.yml`, which builds on every push t
 `main` and publishes to Pages. In the repository settings, set Pages → Source to
 "GitHub Actions" once, and it looks after itself from there.
 
-The site is served from the `/rolldle/` subpath, set as `base` in `vite.config.js`.
-If you move it to the root of a custom domain, change `base` to `/`. The empty
-`public/.nojekyll` file stops Pages running Jekyll over the built output.
+The site lives at its own domain, **rolldle.co.uk**, served from the root, so `base`
+in `vite.config.js` is `/`. The custom domain is pinned two ways so a deploy never
+drops it: the `public/CNAME` file (which ends up in the build output) and the repo's
+Pages settings. The empty `public/.nojekyll` file stops Pages running Jekyll over the
+built output.
+
+The domain needs DNS records at the registrar: four `A` records for the apex pointing
+at GitHub Pages (`185.199.108.153`, `185.199.109.153`, `185.199.110.153`,
+`185.199.111.153`), the matching `AAAA` records (`2606:50c0:8000::153` through
+`...8003::153`), and a `CNAME` on `www` pointing to `jordan-lee-code.github.io`.
