@@ -13,7 +13,7 @@
 <div class="reveal" class:correct={answer.correct}>
   <p class="verdict">
     {#if answer.correct}
-      Spot on — a <strong>{correctLabel.toLowerCase()}</strong> it is.
+      Spot on, a <strong>{correctLabel.toLowerCase()}</strong> it is.
     {:else}
       You said <strong>{chosenLabel.toLowerCase()}</strong>; round there it's a
       <strong>{correctLabel.toLowerCase()}</strong>.

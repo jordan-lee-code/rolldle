@@ -68,7 +68,7 @@ export function rngForDay(n) {
   return mulberry32(fnv1a('rolldle-' + n));
 }
 
-// In-place Fisher–Yates shuffle driven by a supplied rng, so the result is fully
+// In-place Fisher-Yates shuffle driven by a supplied rng, so the result is fully
 // reproducible for a given seed. Returns the same array for convenience.
 function shuffle(array, rng) {
   for (let i = array.length - 1; i > 0; i--) {

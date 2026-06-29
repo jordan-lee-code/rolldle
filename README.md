@@ -37,10 +37,10 @@ Derby. The prompt is filled in for you, and the four multiple-choice options are
 generated automatically from the wider list of names, so you never invent wrong
 answers. Worth adding when they earn their place:
 
-- `elsewhere` — the fond note revealed after the guess.
-- `alsoAcceptable: ['roll']` — other names scored as correct where a region is honestly
+- `elsewhere`: the fond note revealed after the guess.
+- `alsoAcceptable: ['roll']`: other names scored as correct where a region is honestly
   split, so a local is never punished for being right.
-- `image` / `alt` / `size` — pin a specific photo only when the bread itself matters (a
+- `image` / `alt` / `size`: pin a specific photo only when the bread itself matters (a
   real stottie, a real bin lid). Drop the file into `public/images/`, and use `size`
   (`small` | `regular` | `large` | `huge`, see `src/lib/data/sizes.js`) so a big bread
   renders big. Pinned photos that need crediting go in `src/lib/data/credits.js`.
@@ -51,8 +51,8 @@ name quietly enriches every round.
 
 ## The image pool
 
-Most rounds draw their photo from a local asset store in `public/images/pool/` — about
-a hundred roll photos, listed in `src/lib/data/pool.js`. Because the regional names are
+Most rounds draw their photo from a local asset store in `public/images/pool/`, around
+a hundred roll photos listed in `src/lib/data/pool.js`. Because the regional names are
 just local words for an ordinary roll, any roll photo is an honest fit, so the daily
 puzzle pairs a pool image with each region deterministically. A handful of breads where
 the shape genuinely matters (a real stottie, a real bin lid) pin their own verified

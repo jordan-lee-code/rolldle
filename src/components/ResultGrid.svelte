@@ -44,7 +44,7 @@
 
   const lines = {
     5: 'A clean sweep. You could run a bakery.',
-    4: 'Nearly the lot — a fine showing.',
+    4: 'Nearly the lot, a fine showing.',
     3: 'A respectable haul.',
     2: 'A couple landed. The map is a confusing place.',
     1: 'One on the board. Tomorrow is another batch.',

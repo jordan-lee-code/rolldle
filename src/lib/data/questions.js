@@ -8,8 +8,8 @@
 //   roll({ region: 'Derby', answer: 'cob' })
 //
 // That question will show a roll from the pool and ask what they call it in Derby.
-// Pin an `image` only when the specific bread matters — a real stottie, a real bin lid
-// — so the picture genuinely is that thing. Optional fields:
+// Pin an `image` only when the specific bread matters, for a real stottie or a real bin
+// lid, so the picture genuinely is that thing. Optional fields:
 //   - prompt          overrides the auto "In <region>, what would you call this?"
 //   - image / alt     a pinned photo in public/images and its description
 //   - size            'small' | 'regular' | 'large' | 'huge' (see data/sizes.js), used
@@ -19,7 +19,7 @@
 //
 // Regional groundings come from the University of Manchester dialect maps
 // (ourdialects.uk/maps/bread) and the YouGov survey on roll names. Pinned `image` paths
-// are resolved through import.meta.env.BASE_URL at render time — never hardcode a
+// are resolved through import.meta.env.BASE_URL at render time, so never hardcode a
 // leading slash, or they break under the /rolldle/ subpath.
 import { DEFAULT_SIZE } from './sizes.js';
 

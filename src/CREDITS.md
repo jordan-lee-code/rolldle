@@ -12,11 +12,11 @@ doesn't show it for every image.
 A few breads are shown with specific, verified photos, and those photographers are
 named in the app's About panel as well as here:
 
-- **Barm cake with black pudding** — Wendy Mann, CC BY 2.0
+- **Barm cake with black pudding**, by Wendy Mann, CC BY 2.0
   https://commons.wikimedia.org/wiki/File:Barm_cake_with_black_pudding.jpg
-- **Stotty cake** — Mariegriffiths, CC BY-SA 3.0
+- **Stotty cake**, by Mariegriffiths, CC BY-SA 3.0
   https://commons.wikimedia.org/wiki/File:Stotty1.JPG
-- **Belfast bap** — 159753, CC0 1.0
+- **Belfast bap**, by 159753, CC0 1.0
   https://commons.wikimedia.org/wiki/File:Belfast_Bap.jpg
 
 If you grow the pool or pin a new photo, keep `manifest.json` and `credits.js` honest,

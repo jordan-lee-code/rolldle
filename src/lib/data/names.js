@@ -2,8 +2,8 @@
 // it is the right answer or a distractor, is drawn from this single universe, so
 // the choices always feel like plausible siblings rather than obvious throwaways.
 //
-// `label` is what the player sees on the button. Keep the keys short and stable —
-// they are referenced by `answer` in questions.js and stored in saved games.
+// `label` is what the player sees on the button. Keep the keys short and stable,
+// because they are referenced by `answer` in questions.js and stored in saved games.
 export const NAMES = {
   barm: { label: 'Barm' },
   cob: { label: 'Cob' },

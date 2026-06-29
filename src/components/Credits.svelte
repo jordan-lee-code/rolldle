@@ -21,7 +21,7 @@
   <ul>
     {#each pinned as c}
       <li>
-        <strong>{c.title}</strong> — {c.author},
+        <strong>{c.title}</strong>, by {c.author},
         <a href={c.licenseUrl} target="_blank" rel="noopener">{c.license}</a>
       </li>
     {/each}
