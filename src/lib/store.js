@@ -1,5 +1,5 @@
 import { writable } from 'svelte/store';
-import { buildPuzzleForDay, isCorrect, todayNumber } from './daily.js';
+import { buildPuzzleForDay, todayNumber } from './daily.js';
 import { load, save } from './persistence.js';
 
 // One store holds the whole game. It starts on today's puzzle, restores any saved
@@ -17,11 +17,12 @@ function hydrate(n, freshPhase = 'intro') {
   const rec = saved.results[n] ?? null;
 
   const answers = (rec?.guesses ?? []).map((choiceIndex, i) => {
-    const round = puzzle.rounds[i];
-    return {
-      choiceIndex,
-      correct: isCorrect(round.question, round.choices[choiceIndex]),
-    };
+    // Trust the correctness saved with a finished day, so changing how rounds are built
+    // can never rewrite a result you've already seen; only recompute when it's missing.
+    const stored = rec?.correct?.[i];
+    const correct =
+      typeof stored === 'boolean' ? stored : choiceIndex === puzzle.rounds[i].answerIndex;
+    return { choiceIndex, correct };
   });
 
   const complete = Boolean(rec?.complete);
@@ -88,7 +89,7 @@ function createGame() {
         if (s.answers[s.current]) return s;
 
         const round = s.puzzle.rounds[s.current];
-        const correct = isCorrect(round.question, round.choices[choiceIndex]);
+        const correct = choiceIndex === round.answerIndex;
         const answers = [...s.answers, { choiceIndex, correct }];
         const next = { ...s, answers };
         persist(next);

@@ -1,26 +1,47 @@
 <script>
-  import { NAMES } from '../lib/data/names.js';
-
   export let round;
   export let answer; // the player's { choiceIndex, correct }
 
-  $: question = round.question;
-  $: chosenKey = round.choices[answer.choiceIndex];
-  $: correctLabel = NAMES[question.answer]?.label ?? question.answer;
-  $: chosenLabel = NAMES[chosenKey]?.label ?? chosenKey;
+  $: correctLabel = round.choices[round.answerIndex];
+  $: chosenLabel = round.choices[answer.choiceIndex];
+
+  // The verdict reads differently per kind: a roll name wants the indefinite article and
+  // lower case ("a barm it is"), a place name stays as it is ("Newcastle it is"), and the
+  // impostor and face-off rounds talk about the choice rather than the bread.
+  $: verdict = phrase(round.kind, answer.correct, correctLabel, chosenLabel);
+
+  function lower(label) {
+    return label.toLowerCase();
+  }
+
+  function phrase(kind, correct, right, chosen) {
+    switch (kind) {
+      case 'place':
+        return correct
+          ? `Yes, ${right} it is.`
+          : `You said ${chosen}; it's ${right}.`;
+      case 'impostor':
+        return correct
+          ? `Right, ${chosen} is the one we invented.`
+          : `${chosen} is real; the invented one is ${right}.`;
+      case 'national':
+        return correct
+          ? `Right, ${right} is the more common.`
+          : `Actually ${lower(right)} edges out ${lower(chosen)} across the country.`;
+      case 'identify':
+      case 'name':
+      default:
+        return correct
+          ? `Spot on, a ${lower(right)} it is.`
+          : `You said ${lower(chosen)}; it's a ${lower(right)}.`;
+    }
+  }
 </script>
 
 <div class="reveal" class:correct={answer.correct}>
-  <p class="verdict">
-    {#if answer.correct}
-      Spot on, a <strong>{correctLabel.toLowerCase()}</strong> it is.
-    {:else}
-      You said <strong>{chosenLabel.toLowerCase()}</strong>; round there it's a
-      <strong>{correctLabel.toLowerCase()}</strong>.
-    {/if}
-  </p>
-  {#if question.elsewhere}
-    <p class="elsewhere">{question.elsewhere}</p>
+  <p class="verdict">{verdict}</p>
+  {#if round.reveal}
+    <p class="elsewhere">{round.reveal}</p>
   {/if}
 </div>
 

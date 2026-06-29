@@ -2,7 +2,6 @@
   import { createEventDispatcher } from 'svelte';
   import ChoiceButton from './ChoiceButton.svelte';
   import Reveal from './Reveal.svelte';
-  import { NAMES } from '../lib/data/names.js';
   import { sizeFor } from '../lib/data/sizes.js';
 
   export let round;
@@ -14,8 +13,10 @@
   const dispatch = createEventDispatcher();
   const base = import.meta.env.BASE_URL;
 
-  $: question = round.question;
   $: answered = answer != null;
+  // Word rounds (spot the impostor, the national face-off) carry no photo, so the board
+  // only shows when there's an image to put on it.
+  $: hasImage = Boolean(round.image);
   $: size = sizeFor(round.size);
   // The photo dominates the screen (a regular roll fills about two thirds of it), and
   // size scales from there against a constant board: a stottie fills it edge to edge, a
@@ -51,19 +52,21 @@
 <section class="round">
   <p class="progress">Roll {roundNumber} of {total}</p>
 
-  <figure>
-    <div class="board">
-      <img src={`${base}${round.image}`} alt={round.alt} style={`width:${widthPct}%`} />
-    </div>
-    {#if showCaption}<figcaption>{size.caption}</figcaption>{/if}
-  </figure>
+  {#if hasImage}
+    <figure>
+      <div class="board">
+        <img src={`${base}${round.image}`} alt={round.alt} style={`width:${widthPct}%`} />
+      </div>
+      {#if showCaption}<figcaption>{size.caption}</figcaption>{/if}
+    </figure>
+  {/if}
 
-  <h2 class="prompt">{question.prompt}</h2>
+  <h2 class="prompt" class:wordy={!hasImage}>{round.prompt}</h2>
 
   <div class="choices">
-    {#each round.choices as key, i}
+    {#each round.choices as choice, i}
       <ChoiceButton
-        label={NAMES[key]?.label ?? key}
+        label={choice}
         shortcut={i + 1}
         state={states[i]}
         disabled={answered}
@@ -74,7 +77,7 @@
 
   <p class="live" aria-live="polite">
     {#if answered}
-      {answer.correct ? 'Correct.' : 'Not the local word.'}
+      {answer.correct ? 'Correct.' : 'Not quite.'}
     {/if}
   </p>
 
@@ -128,6 +131,12 @@
     font-size: 1.3rem;
     margin: 0.5rem 0 1rem;
     text-align: center;
+  }
+  /* With no photo above it, the question carries the round, so it gets a little more
+     room and weight to fill the space the board would have taken. */
+  .prompt.wordy {
+    font-size: 1.45rem;
+    margin: 1.75rem 0 1.5rem;
   }
   .choices {
     display: grid;

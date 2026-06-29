@@ -56,8 +56,8 @@
   {#if phase === 'intro'}
     <section class="intro">
       <p class="lead">
-        {ROUNDS_PER_DAY} rolls, {ROUNDS_PER_DAY} corners of Britain, and one daily argument
-        about what to call them.
+        {ROUNDS_PER_DAY} rounds, a country that can't agree on what to call a bread roll,
+        and one daily argument about it.
       </p>
       <button class="play" type="button" on:click={() => game.start()}>Play today's rolls</button>
     </section>

@@ -6,14 +6,21 @@
 <Modal title="How to play" on:close>
   <p>
     Britain cannot agree on what to call a bread roll, and that disagreement is the
-    whole game. Each day you get {ROUNDS_PER_DAY} rolls to name.
+    whole game. Each day you get {ROUNDS_PER_DAY} rounds.
   </p>
   <ol>
-    <li>You're shown a roll and told where in the country you're standing.</li>
-    <li>Pick the name a local would actually use from the four on offer.</li>
+    <li>Most rounds show a roll and tell you where you're standing; pick the name a local would use.</li>
     <li>
-      After each guess you'll find out what the same roll is called elsewhere, because
-      half the joy is in the argument.
+      Some rounds flip it around: you're given the name and asked where in Britain
+      you'd hear it, or shown a distinctive bread to identify with no clue at all.
+    </li>
+    <li>
+      A couple are pure word games: spot the name we invented among the real ones, or
+      pick the one the country uses more often.
+    </li>
+    <li>
+      After each guess you'll find out a little more, because half the joy is in the
+      argument.
     </li>
   </ol>
   <p>

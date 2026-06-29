@@ -57,6 +57,7 @@ export const QUESTIONS = [
     prompt: 'On Tyneside, what would you call this?',
     answer: 'stottie',
     size: 'huge',
+    distinctive: true,
     elsewhere:
       "A stottie (or stotty cake) in the North East, flat and broad and traditionally big enough to share around. Almost nowhere else uses the word, which is rather the charm of it.",
   }),
@@ -66,6 +67,7 @@ export const QUESTIONS = [
     region: 'Liverpool',
     answer: 'binlid',
     size: 'large',
+    distinctive: true,
     elsewhere:
       "A big flat one like this earns the name bin lid on Merseyside, for reasons the size makes obvious. An everyday one here is a batch, while just up the road in Bolton it's a barm.",
     alsoAcceptable: ['batch'],
