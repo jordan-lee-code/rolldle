@@ -4,6 +4,7 @@
   import HowToPlay from './components/HowToPlay.svelte';
   import Credits from './components/Credits.svelte';
   import Archive from './components/Archive.svelte';
+  import Endless from './components/Endless.svelte';
   import RoundCard from './components/RoundCard.svelte';
   import ResultGrid from './components/ResultGrid.svelte';
   import { game } from './lib/store.js';
@@ -13,6 +14,7 @@
   let showHelp = false;
   let showCredits = false;
   let showArchive = false;
+  let endless = false;
 
   $: ({ puzzle, phase, current, answers, streak, seenHelp, isToday } = $game);
   $: round = puzzle.rounds[current];
@@ -44,11 +46,16 @@
     dayNumber={puzzle.dayNumber}
     {isToday}
     {dateLabel}
+    {endless}
+    on:endless={() => (endless = true)}
     on:archive={() => (showArchive = true)}
     on:help={() => (showHelp = true)}
     on:credits={() => (showCredits = true)}
   />
 
+  {#if endless}
+    <Endless on:close={() => (endless = false)} />
+  {:else}
   {#if !isToday && phase !== 'done'}
     <button class="back-today" type="button" on:click={goToToday}>← Back to today's roll</button>
   {/if}
@@ -79,7 +86,9 @@
       {isToday}
       on:today={goToToday}
       on:archive={() => (showArchive = true)}
+      on:endless={() => (endless = true)}
     />
+  {/if}
   {/if}
 
   <footer>

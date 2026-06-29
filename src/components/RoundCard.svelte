@@ -9,6 +9,7 @@
   export let roundNumber; // 1-based
   export let total;
   export let isLast;
+  export let progressLabel = ''; // overrides "Roll X of Y" (endless mode shows the run)
 
   const dispatch = createEventDispatcher();
   const base = import.meta.env.BASE_URL;
@@ -50,7 +51,7 @@
 <svelte:window on:keydown={onKeydown} />
 
 <section class="round">
-  <p class="progress">Roll {roundNumber} of {total}</p>
+  <p class="progress">{progressLabel || `Roll ${roundNumber} of ${total}`}</p>
 
   {#if hasImage}
     <figure>

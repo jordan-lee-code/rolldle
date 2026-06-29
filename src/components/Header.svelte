@@ -4,6 +4,7 @@
   export let dayNumber;
   export let isToday = true;
   export let dateLabel = '';
+  export let endless = false;
   const dispatch = createEventDispatcher();
 </script>
 
@@ -18,6 +19,15 @@
     </div>
   </div>
   <nav>
+    {#if !endless}
+      <button
+        type="button"
+        class="pill"
+        on:click={() => dispatch('endless')}
+        aria-label="Endless practice"
+        title="Endless practice">∞</button
+      >
+    {/if}
     <button
       type="button"
       class="pill"

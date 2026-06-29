@@ -161,6 +161,33 @@ export function buildPuzzle(date = new Date()) {
   return buildPuzzleForDay(dayNumber(date));
 }
 
+// One standalone round for endless practice mode, seeded by a single number so a run is
+// reproducible from its seed but every round looks fresh. Unlike the daily puzzle there's
+// no within-day dedup to honour, so each round picks its own kind and question cleanly.
+const ENDLESS_KINDS = ['name', 'name', 'place', 'identify', 'impostor', 'national'];
+export function buildEndlessRound(seed) {
+  const rng = mulberry32(fnv1a('rolldle-endless-' + seed));
+  const questions = shuffle([...QUESTIONS], rng);
+  const distinctive = questions.filter((q) => q.distinctive);
+  const poolShuffled = shuffle([...POOL], rng);
+  let pi = 0;
+  const nextPool = () => poolShuffled[pi++ % poolShuffled.length];
+
+  const kind = ENDLESS_KINDS[Math.floor(rng() * ENDLESS_KINDS.length)];
+  switch (kind) {
+    case 'place':
+      return buildPlaceRound(questions[0], rng, nextPool, questions);
+    case 'identify':
+      return buildIdentifyRound(distinctive[0], rng);
+    case 'impostor':
+      return buildImpostorRound(rng);
+    case 'national':
+      return buildNationalRound(rng);
+    default:
+      return buildNameRound(questions[0], rng, nextPool);
+  }
+}
+
 // Milliseconds until the next local midnight, for the "come back tomorrow" countdown.
 export function msUntilTomorrow(date = new Date()) {
   const next = new Date(date.getFullYear(), date.getMonth(), date.getDate() + 1);

@@ -84,6 +84,10 @@
     <textarea readonly rows="3">{gridText}</textarea>
   </details>
 
+  <button class="endless" type="button" on:click={() => dispatch('endless')}>
+    Not done yet? Play endless ∞
+  </button>
+
   <aside class="kofi">
     <p>
       Rolldle is free, and made for the love of a daft argument about bread. If it
@@ -166,6 +170,21 @@
     cursor: pointer;
     color: var(--ink-soft);
     font-size: 0.9rem;
+  }
+  .endless {
+    width: 100%;
+    margin-top: 1.25rem;
+    border: 1px solid var(--line);
+    background: var(--surface);
+    color: var(--ink);
+    padding: 0.8rem;
+    border-radius: var(--radius);
+    font-weight: 700;
+    font-size: 0.98rem;
+    cursor: pointer;
+  }
+  .endless:hover {
+    border-color: var(--crust);
   }
   textarea {
     width: 100%;

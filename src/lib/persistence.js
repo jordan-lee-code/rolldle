@@ -13,6 +13,7 @@ function emptyState() {
     lastPlayedDay: null,
     results: {}, // dayNumber -> { guesses, correct, score, complete }
     streak: { current: 0, max: 0, lastDay: null },
+    endlessBest: 0, // longest sudden-death practice run
   };
 }
 
