@@ -15,6 +15,15 @@ missed, all the way to day zero. The archive shares the exact same machinery as 
 daily game, so a past day plays and saves just like today's. Only today's roll moves
 your streak, though, so catching up is purely for the pleasure of it.
 
+A day is a mix of round kinds rather than the same question five times. Most rounds
+show a roll and a place to name, but some flip it around (you're given the name and
+asked where in Britain you'd hear it), some show a distinctive bread to identify with
+no clue, and a couple are pure word games (spot the invented name, or pick the one the
+country uses more often). The kinds are defined in `src/lib/rounds.js`; `daily.js`
+chooses each day's mix deterministically under gentle caps. Two extra modes live behind
+their own header buttons: an endless sudden-death run (∞), and the grid (▦), a
+Connections-style puzzle of sixteen places sorted by the name each region uses.
+
 ## Running it locally
 
 ```

@@ -27,6 +27,11 @@
     Everyone playing today gets the same rolls, so you can share your row of squares
     without giving the answers away. Come back tomorrow for a fresh batch.
   </p>
+  <p>
+    The buttons up top open the rest: the archive to catch up on any day you missed, an
+    endless run for when five rounds isn't enough, and the grid, a sorting puzzle of
+    sixteen places that all call a roll the same thing.
+  </p>
   <p class="aside">
     Sizes are real, by the way. A stottie or a teacake is made to be shared and dwarfs
     an ordinary dinner roll, and the pictures keep that to scale.

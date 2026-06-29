@@ -5,6 +5,7 @@
   export let isToday = true;
   export let dateLabel = '';
   export let endless = false;
+  export let grid = false;
   const dispatch = createEventDispatcher();
 </script>
 
@@ -19,6 +20,15 @@
     </div>
   </div>
   <nav>
+    {#if !grid}
+      <button
+        type="button"
+        class="pill"
+        on:click={() => dispatch('grid')}
+        aria-label="The grid"
+        title="The grid">▦</button
+      >
+    {/if}
     {#if !endless}
       <button
         type="button"
